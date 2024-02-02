@@ -169,3 +169,45 @@ function updateNhanVien() {
 }
 document.getElementById('btnCapNhat').onclick = updateNhanVien;
 // ------Tìm kiếm nhân viên--------------
+// function searchNhanVienByXepLoai(arrNhanVien, xepLoai) {
+//     var ketQua = arrNhanVien.filter((nhanVien) => {
+//         if (typeof nhanVien.xepLoai === 'function') {
+//             return nhanVien.xepLoai().toLowerCase() === xepLoai.toLowerCase();
+//         }
+//         return false;
+//     });
+//     console.log(ketQua);
+//     return ketQua;
+// }
+
+// document.getElementById('searchName').oninput = function () {
+//     var xepLoaiCanTim = document.getElementById('searchName').value;
+//     console.log(xepLoaiCanTim);
+//     // Thực hiện tìm kiếm theo xếp loại
+//     var ketQuaTimKiem = searchNhanVienByXepLoai(arrNhanVien, xepLoaiCanTim);
+//     console.log(ketQuaTimKiem);
+//     // Cập nhật giao diện người dùng
+//     renderNhanVien(ketQuaTimKiem);
+// };
+function searchNhanVien(event) {
+    var valueUser = event.target.value;
+    console.log(valueUser);
+    var keyword = valueUser.trim().toLowerCase();
+    var newKeyword = removeVietnameseTones(keyword);
+    console.log(newKeyword);
+    var arrNhanVienFilter = [];
+    console.log(arrNhanVien);
+    for (var i = 0; i < arrNhanVien.length; i++) {
+        console.log(arrNhanVien[i]);
+        var nhanVien = arrNhanVien[i];
+        var newNhanVien = new NhanVien();
+        Object.assign(newNhanVien, nhanVien);
+        var newTenNhanVien = removeVietnameseTones(newNhanVien.xepLoai().trim().toLowerCase());
+        if (newTenNhanVien.includes(newKeyword)) {
+            arrNhanVienFilter.push(newNhanVien);
+        }
+    }
+    renderNhanVien(arrNhanVienFilter);
+    console.log(arrNhanVienFilter);
+}
+document.getElementById('searchName').oninput = searchNhanVien;
