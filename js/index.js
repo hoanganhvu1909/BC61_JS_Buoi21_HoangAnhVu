@@ -1,7 +1,6 @@
 //------------ Thêm nhân viên----------------
 var arrNhanVien = [];
-
-document.getElementById('btnThemNV').onclick = function () {
+function addNhanVien() {
     var arrInput = document.querySelectorAll('#formQLNV input, #formQLNV select');
     // console.log(arrInput);
     var nhanVien = new NhanVien();
@@ -11,13 +10,34 @@ document.getElementById('btnThemNV').onclick = function () {
         nhanVien[id] = arrInput[index].value;
     }
     // console.log(nhanVien);
-    arrNhanVien.push(nhanVien);
-    // console.log(arrNhanVien);
-    // Lưu trữ dữ liệu
-    saveLocalStorage('arrNhanVien', arrNhanVien);
-    renderNhanVien();
-    // Clear dữ liệu Input trong thẻ form
-    document.getElementById('formQLNV').reset();
+
+    var isValid = true;
+    // Chạy hàm kiểm tra dữ liệu rỗng
+    isValid &= checkEmptyValue(nhanVien.tknv, 'tbTKNV') && checkNumberValue(nhanVien.tknv, 'tbTKNV');
+    isValid &= checkEmptyValue(nhanVien.name, 'tbTen') && checkNameValue(nhanVien.name, 'tbTen');
+    isValid &= checkEmptyValue(nhanVien.email, 'tbEmail') && checkEmailValue(nhanVien.email, 'tbEmail');
+    isValid &= checkEmptyValue(nhanVien.password, 'tbMatKhau') && checkPassValue(nhanVien.password, 'tbMatKhau');
+    isValid &= checkEmptyValue(nhanVien.datepicker, 'tbNgay') && checkDateValue(nhanVien.datepicker, 'tbNgay');
+    isValid &= checkEmptyValue(nhanVien.luongCB, 'tbLuongCB') && checkLuong(nhanVien.luongCB, 'tbLuongCB');
+    isValid &= checkEmptyValue(nhanVien.chucvu, 'tbChucVu');
+    isValid &= checkEmptyValue(nhanVien.gioLam, 'tbGiolam') && checkTime(nhanVien.gioLam, 'tbGiolam');
+    // Kiểm tra isValid
+    if (isValid) {
+        return nhanVien;
+    }
+}
+// Thêm nhân viên
+document.getElementById('btnThemNV').onclick = function () {
+    var nhanVien = addNhanVien();
+    if (nhanVien) {
+        arrNhanVien.push(nhanVien);
+        // console.log(arrNhanVien);
+        // Lưu trữ dữ liệu
+        saveLocalStorage('arrNhanVien', arrNhanVien);
+        renderNhanVien();
+        // Clear dữ liệu Input trong thẻ form
+        document.getElementById('formQLNV').reset();
+    }
 };
 function renderNhanVien(arr) {
     // 1. Truy cập tới mảng nhân viên được thêm vào
@@ -49,9 +69,8 @@ function renderNhanVien(arr) {
         }')" class="btn btn-danger"><i class="fa-solid fa-trash-can"></i></button>
         </td>
         <td>
-        <button onclick="getInfoNhanVien('${
-            newNhanVien.tknv
-        }')" class="btn btn-info"><i class="fa-solid fa-pencil"></i></button>
+        <button onclick="getInfoNhanVien('${newNhanVien.tknv}')" class="btn btn-info"  data-toggle="modal"
+        data-target="#myModal"><i class="fa-solid fa-pencil"></i></button>
         </td>
         </tr>
         `;
@@ -79,7 +98,7 @@ function getLocalStorage(key) {
     }
 }
 getLocalStorage('arrNhanVien');
-// ----------------Xoá dữ liệu----------------------------------
+// ----------------Xoá dữ liệu------------------------------
 function deleteNhanVien(tknv) {
     for (var index = 0; index < arrNhanVien.length; index++) {
         // console.log(arrSinhVien);
@@ -103,5 +122,50 @@ function deleteNhanVien(tknv) {
 //     }
 // }
 // --------------Cập nhật nhân viên---------------------
-function getInfoNhanVien() {}
-function updateNhanVien() {}
+function getInfoNhanVien(tknv) {
+    // console.log(tknv);
+    var nhanVien;
+    for (var index = 0; index < arrNhanVien.length; index++) {
+        if (tknv == arrNhanVien[index].tknv) {
+            nhanVien = arrNhanVien[index];
+        }
+    }
+    // console.log(nhanVien);
+    var arrInput = document.querySelectorAll('#formQLNV input, #formQLNV select');
+    console.log(arrInput);
+    for (let j = 0; j < arrInput.length; j++) {
+        // console.log(arrInput[j]);
+        var id = arrInput[j].id;
+        if (id == 'tknv') {
+            // Xử lý không cho người dùng thay đổi tknv
+            arrInput[j].readOnly = true;
+        }
+        // Đưa nhân viên lên thẻ Input
+        arrInput[j].value = nhanVien[id];
+    }
+}
+function updateNhanVien() {
+    // console.log('check');
+    // Lấy dữ liệu nhân viên sau chỉnh sửa
+    var nhanVien = addNhanVien();
+    // console.log(nhanVien);
+    // Lấy tknv đang được chỉnh sửa và tìm vị trí
+    for (var index = 0; index < arrNhanVien.length; index++) {
+        var nhanVienTrongMang = arrNhanVien[index];
+        if (nhanVien.tknv == nhanVienTrongMang.tknv) {
+            // Gán dữ liệu mới
+            arrNhanVien[index] = nhanVien;
+        }
+    }
+    // console.log(arrNhanVien);
+    // Update dữ liệu mới cập nhật lên giao diện. Gọi lại hàm renderNhanVien()
+    renderNhanVien();
+    // Lưu trữ localStorage
+    saveLocalStorage('arrNhanVien', arrNhanVien);
+    // Set trạng thái cho tknv
+    document.getElementById('tknv').readOnly = false;
+    // Reset form. Trường hợp này có thể không cần
+    document.getElementById('formQLNV').reset();
+}
+document.getElementById('btnCapNhat').onclick = updateNhanVien;
+// ------Tìm kiếm nhân viên--------------
